@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BookMaster</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">📚</div>
+        <div>
+          <h1>BookMaster</h1>
+          <p>Save to your library</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Not Logged In State -->
+    <div id="not-logged-in" class="state hidden">
+      <div class="empty-icon">🔐</div>
+      <p class="empty-title">Not logged in</p>
+      <p class="empty-desc">Please login to BookMaster first</p>
+      <button id="open-app-btn" class="btn btn-primary">
+        Open BookMaster
+      </button>
+    </div>
+
+    <!-- Main State — Logged In -->
+    <div id="main-content" class="state hidden">
+
+      <!-- Current Page Preview -->
+      <div class="page-preview">
+        <img id="page-favicon" src="" alt="" class="favicon" />
+        <div class="page-info">
+          <p id="page-title" class="page-title">Loading...</p>
+          <p id="page-url" class="page-url">...</p>
+        </div>
+      </div>
+
+      <!-- Collection Select -->
+      <div class="form-group">
+        <label>Add to Collection</label>
+        <select id="collection-select">
+          <option value="">No Collection</option>
+        </select>
+      </div>
+
+      <!-- Error Message -->
+      <div id="error-msg" class="error hidden"></div>
+
+      <!-- Success Message -->
+      <div id="success-msg" class="success hidden">
+        <span>✅</span>
+        <p>Saved to library!</p>
+      </div>
+
+      <!-- Save Button -->
+      <button id="save-btn" class="btn btn-primary">
+        <span id="btn-text">💾 Save to Library</span>
+        <span id="btn-loading" class="hidden">
+          <span class="spinner"></span>
+          AI Processing...
+        </span>
+      </button>
+
+      <!-- View Library Link -->
+      <button id="view-library-btn" class="btn btn-secondary">
+        📖 View Library
+      </button>
+    </div>
+
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
