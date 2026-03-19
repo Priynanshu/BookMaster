@@ -17,8 +17,9 @@ app.use(cookieParser())
 app.use(express.json())
 app.use(cors({
    origin: [
-    "https://book-master-ruddy.vercel.app",
-    "chrome-extension://*" // ← extension ke liye
+    "http://localhost:5173",
+    "https://your-frontend.vercel.app", // ← Vercel URL
+    "chrome-extension://*",
   ],
     credentials: true
 }))
