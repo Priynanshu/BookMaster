@@ -5,7 +5,7 @@ import axios from "axios";
 // Har request mein base URL automatically lagega
 // Alag alag jagah URL likhne ki zaroorat nahi
 const api = axios.create({
-  baseURL:  "http://localhost:3000/api",
+  baseURL:  "https://bookmaster-b6pk.onrender.com/api",
   withCredentials: true, // cookies automatically send hongi
   headers: {
     "Content-Type": "application/json",
