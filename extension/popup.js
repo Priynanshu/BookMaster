@@ -1,5 +1,6 @@
 // popup.js
-const API_URL = "http://localhost:3000/api";
+const API_URL = "https://bookmaster-b6pk.onrender.com/api";
+const APP_URL = "https://book-master-ruddy.vercel.app";
 
 // ── DOM Elements ──────────────────────────────────────
 const notLoggedIn = document.getElementById("not-logged-in");
@@ -18,7 +19,6 @@ const viewLibraryBtn = document.getElementById("view-library-btn");
 
 // ── Init ──────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", async () => {
-  // Step 1: Check login status
   const isLoggedIn = await checkLoginStatus();
 
   if (!isLoggedIn) {
@@ -27,19 +27,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   showState("main-content");
-
-  // Step 2: Current tab info lo
   await loadCurrentTab();
-
-  // Step 3: Collections fetch karo
   await loadCollections();
 });
+
+// ── Get Token ─────────────────────────────────────────
+// Chrome storage se token lo
+const getToken = async () => {
+  const result = await chrome.storage.local.get("token");
+  return result.token || null;
+};
 
 // ── Check Login ───────────────────────────────────────
 const checkLoginStatus = async () => {
   try {
+    const token = await getToken();
+    if (!token) return false;
+
     const response = await fetch(`${API_URL}/auth/me`, {
-      credentials: "include", // cookies bhejo
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     return response.ok;
   } catch {
@@ -58,11 +66,13 @@ const loadCurrentTab = async () => {
     pageTitle.textContent = tab.title || "Untitled";
     pageUrl.textContent = tab.url || "";
 
-    // Favicon set karo
-    const faviconUrl = `https://www.google.com/s2/favicons?domain=${new URL(tab.url).hostname}&sz=32`;
-    pageFavicon.src = faviconUrl;
+    try {
+      const faviconUrl = `https://www.google.com/s2/favicons?domain=${new URL(tab.url).hostname}&sz=32`;
+      pageFavicon.src = faviconUrl;
+    } catch {
+      pageFavicon.style.display = "none";
+    }
 
-    // URL store karo — save ke liye
     saveBtn.dataset.url = tab.url;
   }
 };
@@ -70,15 +80,18 @@ const loadCurrentTab = async () => {
 // ── Load Collections ──────────────────────────────────
 const loadCollections = async () => {
   try {
+    const token = await getToken();
+    if (!token) return;
+
     const response = await fetch(`${API_URL}/collections`, {
-      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!response.ok) return;
 
     const data = await response.json();
-
-    // Dropdown populate karo
     data.collections.forEach((col) => {
       const option = document.createElement("option");
       option.value = col._id;
@@ -97,15 +110,18 @@ saveBtn.addEventListener("click", async () => {
 
   if (!url) return;
 
-  // Loading state
   setLoading(true);
   hideMessages();
 
   try {
+    const token = await getToken();
+
     const response = await fetch(`${API_URL}/items/save`, {
       method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ url, collectionId }),
     });
 
@@ -116,14 +132,11 @@ saveBtn.addEventListener("click", async () => {
       return;
     }
 
-    // Success!
     showSuccess();
-
-    // 2 sec baad popup close karo
     setTimeout(() => window.close(), 2000);
 
   } catch (error) {
-    showError("Connection failed — is your server running?");
+    showError("Connection failed!");
   } finally {
     setLoading(false);
   }
@@ -131,12 +144,12 @@ saveBtn.addEventListener("click", async () => {
 
 // ── Open App ──────────────────────────────────────────
 openAppBtn?.addEventListener("click", () => {
-  chrome.tabs.create({ url: "http://localhost:5173/dashboard" });
+  chrome.tabs.create({ url: `${APP_URL}/dashboard` });
 });
 
 // ── View Library ──────────────────────────────────────
 viewLibraryBtn?.addEventListener("click", () => {
-  chrome.tabs.create({ url: "http://localhost:5173/dashboard" });
+  chrome.tabs.create({ url: `${APP_URL}/dashboard` });
 });
 
 // ── Helper Functions ──────────────────────────────────
