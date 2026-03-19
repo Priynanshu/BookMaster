@@ -1,5 +1,3 @@
-<img width="1366" height="768" alt="Screenshot (334)" src="https://github.com/user-attachments/assets/795410de-0ae0-4689-9801-d066c69f3553" /><img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/9daee3fd-29ff-4478-adfe-827666997988" /># 📚 BookMaster — Personal Knowledge Management App
-
 A full-stack AI-powered app to save, organize, and resurface anything from the internet.
 
 ## 🚀 Features
