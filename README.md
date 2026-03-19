@@ -1,3 +1,8 @@
+<img width="1366" height="650" alt="Screenshot (334)" src="https://github.com/user-attachments/assets/683dc7f9-5e87-4001-a4d5-91b892cae9a9" />
+<img width="1366" height="640" alt="Screenshot (336)" src="https://github.com/user-attachments/assets/a8941293-859b-45b3-b17d-4964b39d095c" />
+
+
+
 A full-stack AI-powered app to save, organize, and resurface anything from the internet.
 
 ## 🚀 Features
