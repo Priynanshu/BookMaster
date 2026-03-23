@@ -19,7 +19,6 @@ const { uploadPDF } = require("../services/cloudinaryService");
 
 router.post("/upload-pdf", authMiddleware.identifyUser, uploadPDF.single("pdf"), uploadPDFItem);
  
-// All routes are protected — login required
 router.post("/save", authMiddleware.identifyUser, saveItem);
 router.get("/", authMiddleware.identifyUser, getAllItems);
 router.get("/resurfaced", authMiddleware.identifyUser, getResurfaced);

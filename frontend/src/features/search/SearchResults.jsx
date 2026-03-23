@@ -10,9 +10,12 @@ import {
   clearResults,
 } from "../../features/search/searchSlice";
 import useDebounce from "../../hooks/useDebounce";
+import { useNavigate } from "react-router-dom";
 
 const SearchResults = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate()
+
   const [query, setQuery] = useState("");
   const [activeTag, setActiveTag] = useState(null);
 
@@ -173,6 +176,7 @@ const SearchResults = () => {
           {!isLoading && results.map((item, idx) => (
             <motion.div
               key={item._id}
+              onClick={() => navigate(`/items/${item._id}`)}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}

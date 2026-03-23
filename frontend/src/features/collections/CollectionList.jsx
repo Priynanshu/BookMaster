@@ -114,6 +114,7 @@ const CollectionPage = () => {
             {items.map((item, idx) => (
               <motion.div
                 key={item._id}
+                onClick={() => navigate(`/items/${item._id}`)}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}

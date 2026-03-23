@@ -1,8 +1,6 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
 
-// services/scraper.js mein scrapeURL function update karo
-
 const scrapeURL = async (url) => {
   try {
     // ── YouTube Special Handling ──────────────────

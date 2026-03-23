@@ -1,9 +1,6 @@
-// controllers/collections.controller.js
 const Collection = require("../models/collection.model");
 const Item = require("../models/item.model");
 
-// ── Create Collection ─────────────────────────────────
-// POST /api/collections
 const createCollection = async (req, res) => {
   try {
     const { name, description, icon, color } = req.body;
@@ -12,7 +9,6 @@ const createCollection = async (req, res) => {
       return res.status(400).json({ message: "Collection name is required" });
     }
 
-    // Check duplicate — same user cannot have same collection name
     const existing = await Collection.findOne({ 
       user: req.user.userId, 
       name: name.trim() 
@@ -37,14 +33,12 @@ const createCollection = async (req, res) => {
   }
 };
 
-// ── Get All Collections ───────────────────────────────
-// GET /api/collections
+// ── Get All Collections 
 const getAllCollections = async (req, res) => {
   try {
     const collections = await Collection.find({ user: req.user.userId })
       .sort({ createdAt: -1 });
 
-    // Each collection ke saath item count bhi bhejo
     const collectionsWithCount = await Promise.all(
       collections.map(async (col) => {
         const count = await Item.countDocuments({ 
@@ -63,8 +57,7 @@ const getAllCollections = async (req, res) => {
   }
 };
 
-// ── Get Single Collection with Items ─────────────────
-// GET /api/collections/:id
+// ── Get Single Collection with Items
 const getCollectionById = async (req, res) => {
   try {
     const collection = await Collection.findOne({
@@ -76,7 +69,6 @@ const getCollectionById = async (req, res) => {
       return res.status(404).json({ message: "Collection not found" });
     }
 
-    // Collection ke saath uske items bhi fetch karo
     const items = await Item.find({
       collection: collection._id,
       isArchived: false,
@@ -92,8 +84,7 @@ const getCollectionById = async (req, res) => {
   }
 };
 
-// ── Update Collection ─────────────────────────────────
-// PATCH /api/collections/:id
+// ── Update Collection 
 const updateCollection = async (req, res) => {
   try {
     const allowedFields = ["name", "description", "icon", "color"];
@@ -123,8 +114,7 @@ const updateCollection = async (req, res) => {
   }
 };
 
-// ── Delete Collection ─────────────────────────────────
-// DELETE /api/collections/:id
+// ── Delete Collection
 const deleteCollection = async (req, res) => {
   try {
     const collection = await Collection.findOneAndDelete({
@@ -135,9 +125,7 @@ const deleteCollection = async (req, res) => {
     if (!collection) {
       return res.status(404).json({ message: "Collection not found" });
     }
-
-    // Collection delete hone par items ko null kar do
-    // Items delete mat karo — sirf unlink karo
+    
     await Item.updateMany(
       { collection: collection._id },
       { collection: null }

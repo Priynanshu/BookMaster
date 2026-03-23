@@ -1,8 +1,7 @@
-// src/features/auth/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authService from "../../services/authService";
 
-// ── Initial State ─────────────────────────────────────
+// ── Initial State
 const initialState = {
   user: null,
   isAuthenticated: false,
@@ -10,7 +9,7 @@ const initialState = {
   error: null,
 };
 
-// ── Async Thunks ──────────────────────────────────────
+// ── Async Thunks
 // Thunk = async function jo Redux action dispatch karta hai
 
 // Register thunk
@@ -67,7 +66,7 @@ export const getMe = createAsyncThunk(
   }
 );
 
-// ── Auth Slice ────────────────────────────────────────
+// ── Auth Slice──
 const authSlice = createSlice({
   name: "auth",
   initialState,

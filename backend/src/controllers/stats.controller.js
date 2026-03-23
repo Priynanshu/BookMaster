@@ -1,16 +1,12 @@
-// controllers/stats.controller.js
 const Item = require("../models/item.model");
 const Collection = require("../models/collection.model");
 const mongoose = require("mongoose");
 
-// ── Get Dashboard Stats ───────────────────────────────
-// GET /api/stats
-// Returns all stats needed for dashboard
+// ── Get Dashboard Stats
 const getDashboardStats = async (req, res) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.user.userId);
 
-    // Run all queries in parallel — saves time
     const [
       totalItems,
       totalCollections,
@@ -58,8 +54,6 @@ const getDashboardStats = async (req, res) => {
       }),
     ]);
 
-    // Format itemsByType as object — easier for frontend
-    // [{ _id: "article", count: 5 }] → { article: 5, video: 2 }
     const typeBreakdown = {};
     itemsByType.forEach((t) => {
       typeBreakdown[t._id] = t.count;

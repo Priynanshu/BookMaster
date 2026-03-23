@@ -1,15 +1,12 @@
-// controllers/graph.controller.js
 const Item = require("../models/item.model");
 const mongoose = require("mongoose");
 
-// ── Get Knowledge Graph Data ──────────────────────────
-// GET /api/graph
-// Returns nodes (items) + edges (connections) for D3.js
+// ── Get Knowledge Graph Data
+// Returns nodes items + edges (connections) for D3.js
 const getGraphData = async (req, res) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.user.userId);
 
-    // Fetch all user items — only fields needed for graph
     const items = await Item.find({
       user: userId,
       isArchived: false,
@@ -19,8 +16,6 @@ const getGraphData = async (req, res) => {
       return res.json({ nodes: [], edges: [] });
     }
 
-    // ── Build Nodes ───────────────────────────────────
-    // Each item = one node in the graph
     const nodes = items.map((item) => ({
       id: item._id.toString(),
       title: item.title,
@@ -31,12 +26,9 @@ const getGraphData = async (req, res) => {
       createdAt: item.createdAt,
     }));
 
-    // ── Build Edges ───────────────────────────────────
-    // Two items are connected if they share a common tag
-    // Example: item A has ["react", "js"] — item B has ["react", "hooks"]
-    // They share "react" → edge between A and B
+  
     const edges = [];
-    const addedEdges = new Set(); // duplicate edges avoid karo
+    const addedEdges = new Set(); // avoiding duplicate edges
 
     for (let i = 0; i < items.length; i++) {
       for (let j = i + 1; j < items.length; j++) {
@@ -57,7 +49,6 @@ const getGraphData = async (req, res) => {
               source: itemA._id.toString(),
               target: itemB._id.toString(),
               commonTags,
-              // More common tags = stronger connection
               strength: commonTags.length,
             });
             addedEdges.add(edgeKey);

@@ -1,30 +1,22 @@
-// controllers/search.controller.js
 const Item = require("../models/item.model");
 const { generateSearchEmbedding } = require("../services/embeddings");
 const mongoose = require("mongoose");
 
-// ── Semantic Search ───────────────────────────────────
-// GET /api/search?q=react hooks
-// Finds similar items using vector similarity
+// ── Semantic Search
 const semanticSearch = async (req, res) => {
   try {
     const { q } = req.query;
 
-    // Validate — query is required
     if (!q || q.trim() === "") {
       return res.status(400).json({ message: "Search query is required" });
     }
 
-    // Step 1: Convert search query to embedding vector
-    // "search_query" inputType — optimized for queries not documents
     const queryEmbedding = await generateSearchEmbedding(q);
 
     if (!queryEmbedding || queryEmbedding.length === 0) {
       return res.status(500).json({ message: "Failed to generate search embedding" });
     }
 
-    // Step 2: MongoDB Atlas Vector Search aggregation
-    // $vectorSearch finds documents whose embedding is most similar
     const results = await Item.aggregate([
       {
         $vectorSearch: {
@@ -40,14 +32,11 @@ const semanticSearch = async (req, res) => {
         },
       },
       {
-        // Add similarity score to each result
-        // score 1.0 = perfect match, 0.0 = no relation
         $addFields: {
           score: { $meta: "vectorSearchScore" },
         },
       },
       {
-        // Remove heavy fields — not needed in frontend
         $project: {
           embedding: 0,
           content: 0,
@@ -67,9 +56,7 @@ const semanticSearch = async (req, res) => {
   }
 };
 
-// ── Search by Tag ─────────────────────────────────────
-// GET /api/search/tags?tag=javascript
-// Returns all items with a specific tag
+// ── Search by Tag 
 const searchByTag = async (req, res) => {
   try {
     const { tag } = req.query;
@@ -78,7 +65,6 @@ const searchByTag = async (req, res) => {
       return res.status(400).json({ message: "Tag is required" });
     }
 
-    // Find items where tags array contains this tag — case insensitive
     const items = await Item.find({
       user: req.user.userId,
       tags: { $regex: tag, $options: "i" },
@@ -95,32 +81,25 @@ const searchByTag = async (req, res) => {
   }
 };
 
-// ── Get All Tags ──────────────────────────────────────
-// GET /api/search/tags/all
-// Returns all unique tags used by the user with count
+// ── Get All Tags
 const getAllTags = async (req, res) => {
   try {
     const result = await Item.aggregate([
-      // Filter only this user's active items
       {
         $match: {
           user: new mongoose.Types.ObjectId(req.user.userId),
           isArchived: false,
         },
       },
-      // Unwind — splits array into separate documents
-      // item with tags ["react","js"] → 2 separate documents
       {
         $unwind: "$tags",
       },
-      // Group by tag name — count occurrences
       {
         $group: {
           _id: "$tags",
           count: { $sum: 1 },
         },
       },
-      // Sort by count — most used tags first
       {
         $sort: { count: -1 },
       },

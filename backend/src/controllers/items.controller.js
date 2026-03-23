@@ -1,5 +1,5 @@
 const Item = require("../models/item.model");
-  const mongoose = require("mongoose"); 
+const mongoose = require("mongoose"); 
 const { scrapeURL } = require("../services/scraper");
 const { uploadPDF, deleteFromCloudinary, getPublicIdFromUrl } = require("../services/cloudinaryService");
 const pdfParse = require("pdf-parse");
@@ -12,31 +12,27 @@ const {
 } = require("../services/embeddings");
 const { getResurfacedItems } = require("../services/resurfacing");
 
-// ── Save Item ─────────────────────────────────────────
-// POST /api/items/save
-// User sends URL → scrape → AI process → save to MongoDB
+// ── Save Item
 const saveItem = async (req, res) => {
   try {
     const { url, collectionId } = req.body;
 
-    // Validate — URL is required
     if (!url) {
       return res.status(400).json({ message: "URL is required" });
     }
 
-    // Check duplicate — same user cannot save same URL twice
     const existing = await Item.findOne({ user: req.user.userId, url });
     if (existing) {
       return res.status(400).json({ message: "You have already saved this URL" });
     }
 
-    // Step 1: Scrape URL — extract title, content, thumbnail
+    //  Scrape URL — extract title, content, thumbnail
     const scraped = await scrapeURL(url);
 
-    // Step 2: Combine title + content for better AI context
+    //  Combine title + content for better AI context
     const textForAI = `${scraped.title} ${scraped.content}`.trim();
 
-    // Step 3: Run all AI tasks in parallel — saves time
+    //  Run all AI tasks in parallel — saves time
     // Promise.all runs all 3 simultaneously instead of one by one
     const [tags, summary, embedding] = await Promise.all([
       generateTags(scraped.title, scraped.content),
@@ -44,7 +40,6 @@ const saveItem = async (req, res) => {
       generateEmbedding(textForAI),
     ]);
 
-    // Step 4: Save everything to MongoDB
     const item = await Item.create({
       user: req.user.userId,
       url,
@@ -60,7 +55,7 @@ const saveItem = async (req, res) => {
       collection: collectionId || null,
     });
 
-    // Step 5: Remove embedding before sending response
+    // Remove embedding before sending response
     // 1024 numbers — no need to send to frontend
     const itemToReturn = item.toObject();
     delete itemToReturn.embedding;
@@ -76,9 +71,7 @@ const saveItem = async (req, res) => {
   }
 };
 
-// ── Get All Items ─────────────────────────────────────
-// GET /api/items
-// Returns all saved items of logged in user with optional filters
+// ── Get All Items
 const getAllItems = async (req, res) => {
   try {
     const { type, tag, collection, archived } = req.query;
@@ -90,12 +83,11 @@ const getAllItems = async (req, res) => {
     if (tag) filter.tags = tag;
     if (collection) filter.collection = collection;
 
-    // Default: show active items — archived=true shows archived
     filter.isArchived = archived === "true" ? true : false;
 
     const items = await Item.find(filter)
-      .select("-embedding -content") // exclude heavy fields
-      .sort({ createdAt: -1 })       // newest first
+      .select("-embedding -content") 
+      .sort({ createdAt: -1 })       
       .populate("collection", "name icon color");
 
     res.json({ items, total: items.length });
@@ -106,14 +98,12 @@ const getAllItems = async (req, res) => {
   }
 };
 
-// ── Get Single Item ───────────────────────────────────
-// GET /api/items/:id
-// Returns one item by ID — only owner can access
+// ── Get Single Item 
 const getItemById = async (req, res) => {
   try {
     const item = await Item.findOne({
       _id: req.params.id,
-      user: req.user.userId, // security — only owner can access
+      user: req.user.userId, 
     })
       .select("-embedding")
       .populate("collection", "name icon color");
@@ -130,9 +120,7 @@ const getItemById = async (req, res) => {
   }
 };
 
-// ── Update Item ───────────────────────────────────────
-// PATCH /api/items/:id
-// Update notes, highlights, collection, favourite, archived
+// ── Update Item 
 const updateItem = async (req, res) => {
   try {
     // Whitelist — only these fields can be updated
@@ -145,7 +133,6 @@ const updateItem = async (req, res) => {
       "tags",
     ];
 
-    // Build update object — only include allowed fields
     const updates = {};
     allowedFields.forEach((field) => {
       if (req.body[field] !== undefined) {
@@ -156,7 +143,7 @@ const updateItem = async (req, res) => {
     const item = await Item.findOneAndUpdate(
       { _id: req.params.id, user: req.user.userId },
       updates,
-      { returnDocument: "after" } // return updated document
+      { returnDocument: "after" } 
     ).select("-embedding");
 
     if (!item) {
@@ -171,14 +158,12 @@ const updateItem = async (req, res) => {
   }
 };
 
-// ── Delete Item ───────────────────────────────────────
-// DELETE /api/items/:id
-// Permanently delete an item — only owner can delete
+// ── Delete Item
 const deleteItem = async (req, res) => {
   try {
     const item = await Item.findOneAndDelete({
       _id: req.params.id,
-      user: req.user.userId, // security — only owner can delete
+      user: req.user.userId, 
     });
 
     if (!item) {
@@ -193,12 +178,9 @@ const deleteItem = async (req, res) => {
   }
 };
 
-// ── Get Related Items ─────────────────────────────────
-// GET /api/items/:id/related
-// Finds items similar to the given item using vector search
+// ── Get Related Item
 const getRelatedItems = async (req, res) => {
   try {
-    // Step 1: Current item fetch karo — embedding ke saath
     const currentItem = await Item.findOne({
       _id: req.params.id,
       user: req.user.userId,
@@ -212,7 +194,6 @@ const getRelatedItems = async (req, res) => {
       return res.status(400).json({ message: "Item has no embedding" });
     }
 
-    // Step 2: Current item ka embedding use karke similar items dhundo
     const related = await Item.aggregate([
       {
         $vectorSearch: {
@@ -229,8 +210,6 @@ const getRelatedItems = async (req, res) => {
         },
       },
       {
-        // Current item ko results se hatao
-        // Aur sirf is user ke items dikhao
         $match: {
           _id: { $ne: currentItem._id },
           user: new mongoose.Types.ObjectId(req.user.userId),
@@ -265,9 +244,7 @@ const getResurfaced = async (req, res) => {
   }
 };
 
-// / ── Add Highlight ─────────────────────────────────────
-// POST /api/items/:id/highlights
-// Add a highlighted text to an item
+// / ── Add Highlight 
 const addHighlight = async (req, res) => {
   try {
     const { text } = req.body;
@@ -295,9 +272,7 @@ const addHighlight = async (req, res) => {
   }
 };
 
-// ── Delete Highlight ──────────────────────────────────
-// DELETE /api/items/:id/highlights
-// Remove a specific highlight from an item
+// ── Delete Highlight
 const deleteHighlight = async (req, res) => {
   try {
     const { text } = req.body;
@@ -322,8 +297,7 @@ const deleteHighlight = async (req, res) => {
 };
 
 
-// ── Upload PDF ────────────────────────────────────────
-// POST /api/items/upload-pdf
+// ── Upload PDF
 const uploadPDFItem = async (req, res) => {
   try {
     console.log("PDF Upload hit!");
@@ -342,12 +316,10 @@ const uploadPDFItem = async (req, res) => {
         responseType: "arraybuffer",
       });
 
-      // ✅ Fix — pdf-parse sahi tarike se call karo
       const pdfData = await pdfParse(Buffer.from(response.data));
       pdfText = pdfData.text.slice(0, 5000);
     } catch (parseError) {
       console.error("PDF parse error:", parseError.message);
-      // Parse fail ho to bhi continue karo
     }
 
     const [tags, summary, embedding] = await Promise.all([
@@ -384,7 +356,7 @@ const uploadPDFItem = async (req, res) => {
   }
 };
 
-// ── Delete Item — Cloudinary bhi clean karo ───────────
+// ── Delete Item and also clean Cloudinary 
 const deleteItemCloude = async (req, res) => {
   try {
     const item = await Item.findOneAndDelete({
@@ -396,7 +368,6 @@ const deleteItemCloude = async (req, res) => {
       return res.status(404).json({ message: "Item not found" });
     }
 
-    // Agar PDF hai — Cloudinary se bhi delete karo
     if (item.type === "pdf" && item.url.includes("cloudinary")) {
       const publicId = getPublicIdFromUrl(item.url);
       if (publicId) {

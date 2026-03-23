@@ -1,7 +1,7 @@
 // src/features/auth/Login.jsx
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { BookMarked, Github, Mail } from "lucide-react";
+import { BookMarked } from "lucide-react";
 import { Link } from "react-router-dom";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";

@@ -102,16 +102,14 @@ async function login(req, res, next) {
 
 async function logout(req, res, next) {
     try {
-        // 1. Pehle token ko extract karo (Cookie ya Authorization header se)
         const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
-        // 2. Agar token milta hai, tabhi Redis mein set karo
         if (token) {
-            // "EX", 3600 ka matlab hai 1 ghante baad Redis se ye apne aap delete ho jayega
+            //1 Hour
             await redis.set(token, "blacklisted", "EX", 3600);
         }
 
-        // 3. Browser se cookie clear karo
+        // Clearning Cookies From Browser
         res.clearCookie("token", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
