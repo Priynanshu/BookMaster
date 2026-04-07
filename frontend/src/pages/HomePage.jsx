@@ -98,7 +98,9 @@ const HomePage = () => {
               Get Started Free
               <ChevronRight className="inline-block ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="secondary" size="lg" className="px-8 py-4 text-lg border-[#1F1F2E] hover:bg-[#13131A]">
+            <Button
+            onClick={() => navigate('/dashboard')}
+             variant="secondary" size="lg" className="px-8 py-4 text-lg border-[#1F1F2E] hover:bg-[#13131A]">
               View Demo
             </Button>
           </motion.div>

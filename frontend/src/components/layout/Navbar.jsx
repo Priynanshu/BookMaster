@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Bell, User, Menu, Plus, LogOut, 
-  ChevronRight, Settings, LayoutDashboard,
+  ChevronRight, LayoutDashboard,
   BookMarked // Logo ke liye icon import kiya
 } from 'lucide-react';
 import useAuth from '../../hooks/useAuth'; 
@@ -98,9 +98,6 @@ const Navbar = ({ onMenuToggle, onAddBook }) => {
                     >
                       <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-400 hover:text-white hover:bg-[#1F1F2E] rounded-xl transition-all">
                         <LayoutDashboard size={16} /> Dashboard
-                      </Link>
-                      <Link to="/settings" className="flex items-center gap-3 px-4 py-3 text-sm text-gray-400 hover:text-white hover:bg-[#1F1F2E] rounded-xl transition-all">
-                        <Settings size={16} /> Settings
                       </Link>
                       <hr className="my-2 border-[#1F1F2E]" />
                       <button 
