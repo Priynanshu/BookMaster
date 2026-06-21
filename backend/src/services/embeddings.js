@@ -75,10 +75,6 @@ const generateSummary = async (content) => {
   }
 };
 
-// ── generateSearchEmbedding: embedding for search ────
-// When user searches, inputType is "search_query"
-// When saving a document, inputType is "search_document"
-// This difference helps Cohere optimize similarity matching
 const generateSearchEmbedding = async (query) => {
   try {
     const response = await cohere.embed({
