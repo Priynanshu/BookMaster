@@ -43,7 +43,7 @@ const ItemCard = ({ item, handleFavourite, handleDelete }) => {
           >
             <ExternalLink size={14} />
           </a>
-        )}
+        )}   
       </div>
 
       {/* Content Section */}
